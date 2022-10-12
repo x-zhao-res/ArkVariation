@@ -22,21 +22,21 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column label="日期" width="180px" align="center">
+      <el-table-column label="日期" width="140px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.data }}</span>
+          <span>{{ timeChange(parseInt(row.event.timeStart)) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="组名称" width="160" align="center">
         <template slot-scope="{row}">
           <el-tooltip style="margin-top: 4px" effect="dark" content="Left Center 提示文字" placement="top">
-            <span>{{ row.groupname }}</span>
+            <span>{{ row.groupItem.name }}</span>
           </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column label="当前属性值" min-width="30px" align="center">
         <template slot-scope="{row}">
-          <span style="font-size: 21px;font-weight: bolder">{{ row.getoutattribute }}</span>
+          <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.groupItem.attribute) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="妊娠进度" class-name="status-col" width="220">
@@ -51,12 +51,12 @@
       </el-table-column>
       <el-table-column label="变异备注" min-width="150px" align="center">
         <template slot-scope="{row}">
-          <span class="link-type">{{ row.notForget }}</span>
+          <span class="link-type">{{ row.event.eventNoForget }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row}" style="display: flex;">
-          <el-button type="primary">
+          <el-button type="primary" @click="toDetailGroup(row)">
             详情
           </el-button>
           <el-button type="success" :disabled="true">
@@ -77,6 +77,7 @@
 <script>
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { getEvent } from '@/api/arkUse/events'
+import { timestampToTime } from '@/utils/arkVaryFunction'
 
 const dragonVary = [
   { key: 'bianyi', display_name: '变异' },
@@ -92,14 +93,7 @@ export default {
   components: { Pagination },
   data() {
     return {
-      VaryList: [
-        {
-          data: '2022/01/04 15:33:21',
-          groupname: '虚空飞龙-氧气',
-          getoutattribute: 150,
-          notForget: '这幼崽不能要了哈哈哈'
-        }
-      ],
+      VaryList: null,
       listQuery: {
         page: 1,
         baby: '',
@@ -119,9 +113,16 @@ export default {
     this.getListEvent()
   },
   methods: {
+    toDetailGroup(data) {
+      console.log(data)
+    },
+    timeChange(data) {
+      return timestampToTime(data)
+    },
     getListEvent() {
-      getEvent({ belongTribe: this.$store.state.arkuser.belongTribe }).then(res => {
-        console.log(res)
+      getEvent().then(res => {
+        this.VaryList = res
+        console.log(this.VaryList)
       }).catch(err => {
         console.log(err)
       })
