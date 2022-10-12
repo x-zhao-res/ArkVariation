@@ -41,12 +41,22 @@
       </el-table-column>
       <el-table-column label="妊娠进度" class-name="status-col" width="220">
         <template slot-scope="{row}">
-          <el-progress :text-inside="true" :stroke-width="20" :percentage="50" status="exception" />
+          <el-progress
+            :text-inside="true"
+            :stroke-width="20"
+            :percentage="row.babyProgress"
+            :status="(row.babyProgress > 80) ? 'success':(row.babyProgress<30 ? 'exception' : 'format')"
+          />
         </template>
       </el-table-column>
       <el-table-column label="幼崽成长进度" class-name="status-col" width="220">
         <template slot-scope="{row}">
-          <el-progress :text-inside="true" :stroke-width="20" :percentage="50" status="success" />
+          <el-progress
+            :text-inside="true"
+            :stroke-width="20"
+            :percentage="row.upProgress"
+            :status="(row.upProgress > 80) ? 'success':(row.upProgress<30 ? 'exception' : 'format')"
+          />
         </template>
       </el-table-column>
       <el-table-column label="变异备注" min-width="150px" align="center">
@@ -69,16 +79,14 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <!--    <pagination :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />-->
 
   </div>
 </template>
 
 <script>
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { getEvent } from '@/api/arkUse/events'
-import { timestampToTime } from '@/utils/arkVaryFunction'
-
+import { timestampToTime, fotBabyTime, fotUpTime } from '@/utils/arkVaryFunction'
 const dragonVary = [
   { key: 'bianyi', display_name: '变异' },
   { key: 'weibianyi', display_name: '未变异' }
@@ -90,9 +98,9 @@ const babyState = [
 ]
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
   data() {
     return {
+      tableKey: false,
       VaryList: null,
       listQuery: {
         page: 1,
@@ -107,25 +115,43 @@ export default {
     }
   },
   created() {
-    this.getList()
+    // this.getList()
   },
   mounted() {
     this.getListEvent()
+    this.intervalUse()
   },
   methods: {
+    randomMath() {
+      return (Math.random()).toString()
+    },
+    getListEvent() {
+      const that = this
+      getEvent().then(res => {
+        this.VaryList = res
+        for (let listNum = 0; listNum < res.length; listNum++) {
+          that.VaryList[listNum].upProgress = fotUpTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+          that.VaryList[listNum].babyProgress = fotBabyTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    intervalUse() {
+      const that = this
+      setInterval(() => {
+        for (let arrNum = 0; arrNum < this.VaryList.length; arrNum++) {
+          this.VaryList[arrNum].upProgress = fotUpTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
+          this.VaryList[arrNum].babyProgress = fotBabyTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
+        }
+        this.tableKey = !this.tableKey
+      }, 2000)
+    },
     toDetailGroup(data) {
       console.log(data)
     },
     timeChange(data) {
       return timestampToTime(data)
-    },
-    getListEvent() {
-      getEvent().then(res => {
-        this.VaryList = res
-        console.log(this.VaryList)
-      }).catch(err => {
-        console.log(err)
-      })
     }
   }
 }

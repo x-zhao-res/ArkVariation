@@ -17,3 +17,22 @@ export function timestampToTime(timestamp) {
   var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate())
   return Y + '/' + M + '/' + D
 }
+export function fotUpTime(timeStart, upTime, babyTime) {
+  const now = new Date().getTime()
+  if (now < (timeStart + babyTime * 60000)) {
+    return 0
+  }
+  if ((timeStart + babyTime * 60000 + upTime * 60000) < now) {
+    return 100
+  } else {
+    return Math.floor(((now - (timeStart + babyTime * 60000)) / (upTime * 60000) * 10000)) / 100
+  }
+}
+export function fotBabyTime(timeStart, upTime, babyTime) {
+  const now = new Date().getTime()
+  if (timeStart + babyTime * 60000 < now) {
+    return 100
+  } else {
+    return Math.floor(((now - timeStart) / (babyTime * 60000) * 10000)) / 100
+  }
+}
