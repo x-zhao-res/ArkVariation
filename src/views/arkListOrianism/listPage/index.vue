@@ -106,7 +106,7 @@ export default {
         this.varyListUse = res.data
         setTimeout(() => {
           this.listLoading = false
-        }, 1200)
+        }, 500) // 调整用户体验感
       }).catch(error => {
         console.log(error)
       })

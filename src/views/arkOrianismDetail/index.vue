@@ -9,7 +9,7 @@
       <el-card class="descript-box">
         <el-descriptions direction="vertical" :column="4" border>
           <template slot="title">
-            <span style="font-size: 19px;font-family: 'Microsoft YaHei','serif'">虚空飞龙基础信息</span>
+            <span style="font-size: 19px;font-family: 'Microsoft YaHei','serif'">{{ data.oriName }}基础信息</span>
           </template>
           <template slot="extra">
             <el-button type="primary" size="middle">编辑</el-button>
@@ -28,60 +28,30 @@
       </el-card>
     </el-row>
     <el-row>
-      <el-card class="group-box">
-        <div class="group-box-header">
-          <span style="display: flex;align-items: center;">
-            <el-link type="default" :underline="true" style="color: black;font-weight: bolder;font-size: 19px;font-family: 'Microsoft YaHei','serif'">
-              虚空飞龙 - 氧气
-            </el-link>
-            <el-tag style="margin-left: 8px" type="danger">贤者时间就绪</el-tag>
-          </span>
-          <span style="font-size: 26px;font-weight: bolder;font-family: 'Lucida Console','serif'">142/254</span>
-        </div>
-        <div class="progress-fuck">
-          <el-row :gutter="2">
-            <el-col :span="4" style="display: flex;align-items: center">
-              <div style="font-size: 18px;font-family: 黑体,serif;font-weight: bolder">妊娠进度——</div>
-              <div style="font-size: 24px;font-weight: bolder;font-family: 'Lucida Console','serif'">75.25%</div>
-            </el-col>
-            <el-col :span="24" style="margin-top: 10px">
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="70.25" />
-            </el-col>
-            <el-col :span="6" style="margin-top: 10px">
-              <el-button type="primary">重置进度</el-button>
-              <el-button type="danger">结束妊娠</el-button>
-            </el-col>
-          </el-row>
-        </div>
-        <div class="progress-fuck">
-          <el-row :gutter="2">
-            <el-col :span="4" style="display: flex">
-              <div style="font-size: 18px;font-family: 黑体,serif;font-weight: bolder">成长进度——</div>
-              <div style="font-size: 24px;font-weight: bolder;font-family: 'Lucida Console','serif'">75.25%</div>
-            </el-col>
-            <el-col :span="24" style="margin-top: 10px">
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="70.25" />
-            </el-col>
-            <el-col :span="6" style="margin-top: 10px">
-              <el-button type="primary">重置进度</el-button>
-              <el-button type="danger">结束成长</el-button>
-              <el-button type="success">记录点数</el-button>
-            </el-col>
-          </el-row>
-        </div>
-      </el-card>
+      <cardsComponent v-for="(item,key) in eventSimple" :key="key" :optionget="option" :eventforce="item" />
     </el-row>
   </div>
 </template>
 
 <script>
 import echart from 'echarts'
+import cardsComponent from '@/views/arkOrianismDetail/cardsComponent'
+import { getGroup } from '@/api/arkUse/orianism'
+import { getEvent } from '@/api/arkUse/events'
+
 export default {
   name: 'Index',
+  components: {
+    cardsComponent
+  },
   data() {
     return {
       data: this.$route.params.data,
       chartSet: null,
+      orianismArray: [],
+      eventSimple: [],
+      tabChooseUse: null,
+      chartAttrbute: [0, 0, 0, 0, 0],
       textStyleUse: {
         fontSize: 18,
         fontWeight: 'bolder'
@@ -89,27 +59,58 @@ export default {
       desLabStyle: {
         fontSize: '20px',
         fontFamily: '黑体'
-      }
+      },
+      option: [
+        { value: 1, label: '攻击' },
+        { value: 2, label: '生命' },
+        { value: 3, label: '氧气' },
+        { value: 4, label: '耐力' },
+        { value: 5, label: '移速' }
+      ]
     }
   },
   mounted() {
-    console.log(this.data)
-    this.chartinit(this.data.id)
+    console.log(this.data.id)
+    this.getInformation()
+    this.geteventSimple()
   },
   methods: {
-    chartinit(id) {
+    handleClick(data) {
+      console.log(data)
+    },
+    geteventSimple() {
+      getEvent({
+        belongTribe: this.$store.state.arkuser.belongTribe,
+        belongOrianismId: this.data.id
+      }).then(res => {
+        this.eventSimple = res
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getInformation() {
+      getGroup({
+        varyOrianismId: this.data.id,
+        belongTribe: this.$store.state.arkuser.belongTribe
+      }).then(res => {
+        this.orianismArray = res
+        for (let charNum = 0; charNum < this.orianismArray.length; charNum++) {
+          this.chartAttrbute[(this.orianismArray[charNum].varyAttribute - 1)] = this.orianismArray[charNum].attributeNum
+        }
+        this.chartinit(this.chartAttrbute)
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    chartinit(data) {
       this.chartSet = echart.init(document.getElementById('main'))
       var option = {
-        color: ['#c89b40', '#f2be45', '#f20c00', '#44cef6', '#ffa631'],
+        color: ['#c89b40', '#44cef6', '#f2be45', '#f20c00', '#ffa631'],
         xAxis: {
           type: 'category',
           data: [
             {
               value: '攻击',
-              textStyle: this.textStyleUse
-            },
-            {
-              value: '耐力',
               textStyle: this.textStyleUse
             },
             {
@@ -121,7 +122,11 @@ export default {
               textStyle: this.textStyleUse
             },
             {
-              value: '食物',
+              value: '耐力',
+              textStyle: this.textStyleUse
+            },
+            {
+              value: '移速',
               textStyle: this.textStyleUse
             }
           ]
@@ -142,7 +147,7 @@ export default {
         },
         series: [
           {
-            data: [120, 200, 150, 80, 70],
+            data: data,
             type: 'bar',
             showBackground: true,
             itemStyle: {

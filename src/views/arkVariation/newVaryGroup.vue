@@ -126,6 +126,7 @@ export default {
           if (res.message === '创建成功') {
             this.$notify({
               title: '创建成功',
+              type: 'success',
               message: '组 ' + this.Origanism.varyOrianismName + ' 创建成功'
             })
           }

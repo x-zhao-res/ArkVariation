@@ -31,6 +31,11 @@
           </el-tooltip>
         </template>
       </el-table-column>
+      <el-table-column label="当前属性值" min-width="30px" align="center">
+        <template slot-scope="{row}">
+          <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.attributeNum) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="贤者时间" class-name="status-col" width="220">
         <template slot-scope="{row}">
           <el-progress
@@ -53,7 +58,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
-          <el-button style="width: 100px" type="danger">
+          <el-button style="width: 100px" type="danger" @click="showConfirm(row)">
             删除
           </el-button>
         </template>
@@ -61,13 +66,12 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
-
   </div>
 </template>
 
 <script>
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-import { getGroup } from '@/api/arkUse/orianism'
+import { getGroup, delGroup } from '@/api/arkUse/orianism'
 import { ProgressUse } from '@/utils/arkVaryFunction'
 const dragonVary = [
   { key: 'bianyi', display_name: '变异' },
@@ -102,10 +106,46 @@ export default {
     this.changeIntervalGroupProgress()
   },
   methods: {
+    showConfirm(data) {
+      this.$confirm('是否删除组 ' + data.groupName + ' ?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteGroup(data.id)
+      })
+    },
+    deleteGroup(data) {
+      delGroup({ id: data }).then(res => {
+        if (res.message === '删除成功') {
+          this.$notify({
+            title: '删除成功',
+            message: ' 删除成功',
+            type: 'success'
+          })
+          this.VaryList = []
+          this.getListUse()
+          this.changeIntervalGroupProgress()
+        } else {
+          this.$notify({
+            title: '删除失败',
+            message: '请联系管理员',
+            type: 'error'
+          })
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
     getListUse() {
       getGroup().then(res => {
+        console.log(res)
         for (let arrNum = 0; arrNum < res.length; arrNum++) {
-          res[arrNum].progressUse = ProgressUse(res[arrNum])
+          if (res[arrNum].fuckState === 1) {
+            res[arrNum].progressUse = 100
+          } else {
+            res[arrNum].progressUse = ProgressUse(res[arrNum])
+          }
         }
         this.VaryList = res
       }).catch(error => {
@@ -119,7 +159,9 @@ export default {
     changeIntervalGroupProgress() {
       setInterval(() => {
         for (let listNum = 0; listNum < this.VaryList.length; listNum++) {
-          if (this.VaryList[listNum].progressUse !== 100) {
+          if (this.VaryList[listNum].fuckState === 1) {
+            this.VaryList[listNum].progressUse = 100
+          } else {
             this.VaryList[listNum].progressUse = ProgressUse(this.VaryList[listNum])
           }
         }

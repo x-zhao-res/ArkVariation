@@ -27,16 +27,21 @@
           <span>{{ timeChange(parseInt(row.event.timeStart)) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="组名称" width="160" align="center">
+      <el-table-column label="附属组" width="160" align="center">
         <template slot-scope="{row}">
           <el-tooltip style="margin-top: 4px" effect="dark" content="Left Center 提示文字" placement="top">
             <span>{{ row.groupItem.name }}</span>
           </el-tooltip>
         </template>
       </el-table-column>
+      <el-table-column label="事件状态" min-width="30px" align="center">
+        <template slot-scope="{row}">
+          <el-tag effect="dark" :type="(row.event.eventState===0)?'primary':((row.event.eventState === 1)?'success':'danger')"> {{ (row.event.eventState===0)?'未录入':((row.event.eventState === 1)?'已录入':'已废弃') }} </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="当前属性值" min-width="30px" align="center">
         <template slot-scope="{row}">
-          <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.groupItem.attribute) }}</span>
+          <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.groupItem.attributeNum) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="妊娠进度" class-name="status-col" width="220">
@@ -69,23 +74,34 @@
           <el-button type="primary" @click="toDetailGroup(row)">
             详情
           </el-button>
-          <el-button type="success" :disabled="true">
+          <el-button type="success" :disabled="row.event.eventState===1?true:(row.event.eventState===2?true:(row.babyProgress!==100))" @click="thatShow(row)">
             录入
           </el-button>
-          <el-button type="danger">
+          <el-button type="danger" :disabled="row.event.eventState===1?true:(row.event.eventState === 2)" @click="judgeEvent(row)">
             废弃
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
+    <el-dialog title="录入变异点数" :visible.sync="disShow">
+      <el-form>
+        <el-form-item label="上升点数(1-5)" label-width="120px">
+          <el-input v-model="upNum" autocomplete="off" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="disShow = false">取 消</el-button>
+        <el-button type="primary" @click="upNumEventAndEndRefrsh">确 定</el-button>
+      </div>
+    </el-dialog>
     <!--    <pagination :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />-->
 
   </div>
 </template>
 
 <script>
-import { getEvent } from '@/api/arkUse/events'
+import { getEvent, abandonEvent } from '@/api/arkUse/events'
 import { timestampToTime, fotBabyTime, fotUpTime } from '@/utils/arkVaryFunction'
 const dragonVary = [
   { key: 'bianyi', display_name: '变异' },
@@ -102,6 +118,9 @@ export default {
     return {
       tableKey: false,
       VaryList: null,
+      chooseList: {},
+      upNum: null,
+      disShow: false,
       listQuery: {
         page: 1,
         baby: '',
@@ -122,6 +141,54 @@ export default {
     this.intervalUse()
   },
   methods: {
+    thatShow(data) {
+      this.disShow = true
+      this.chooseList = data
+    },
+    upNumEventAndEndRefrsh() {
+      if ((parseInt(this.upNum) < 1 || parseInt(this.upNum) > 5)) {
+        this.$message({ message: '数字超出范围,请重新输入', type: 'error' })
+      } else {
+        this.disShow = false
+        console.log(this.upNum, this.chooseList)
+        const transUp = { // 都变成数字了就行
+          groupId: this.chooseList.groupItem.id,
+          orianismId: this.chooseList.orianismItem.id,
+          id: this.chooseList.event.id,
+          varyNum: parseInt(this.upNum)
+        }
+        console.log(transUp)
+        this.upNum = null
+      }
+    },
+    judgeEvent(data) {
+      this.$confirm('此操作将永久废弃该事件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.abandonEvent(data)
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    abandonEvent(data) {
+      abandonEvent({ id: data.event.id, eventState: 2, upNum: 0 }).then(res => { // 状态改为2，晋升点数改为0
+        if (res.message === '修改成功') {
+          this.$message({
+            message: res.message,
+            type: 'success'
+          })
+          this.getListEvent()
+          this.intervalUse()
+        } else {
+          this.$message({
+            message: res.message,
+            type: 'error'
+          })
+        }
+      })
+    },
     randomMath() {
       return (Math.random()).toString()
     },
@@ -130,8 +197,13 @@ export default {
       getEvent().then(res => {
         this.VaryList = res
         for (let listNum = 0; listNum < res.length; listNum++) {
-          that.VaryList[listNum].upProgress = fotUpTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
-          that.VaryList[listNum].babyProgress = fotBabyTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+          if (res[listNum].event.eventState !== 2) {
+            that.VaryList[listNum].upProgress = fotUpTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+            that.VaryList[listNum].babyProgress = fotBabyTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+          } else {
+            that.VaryList[listNum].upProgress = 0
+            that.VaryList[listNum].babyProgress = 0
+          }
         }
       }).catch(err => {
         console.log(err)
@@ -141,14 +213,21 @@ export default {
       const that = this
       setInterval(() => {
         for (let arrNum = 0; arrNum < this.VaryList.length; arrNum++) {
-          this.VaryList[arrNum].upProgress = fotUpTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
-          this.VaryList[arrNum].babyProgress = fotBabyTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
+          if (that.VaryList[arrNum].event.eventState !== 2) {
+            this.VaryList[arrNum].upProgress = fotUpTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
+            this.VaryList[arrNum].babyProgress = fotBabyTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
+          }
         }
         this.tableKey = !this.tableKey
       }, 2000)
     },
     toDetailGroup(data) {
-      console.log(data)
+      this.$router.push({
+        name: 'orianismDetail',
+        params: {
+          data: data.orianismItem
+        }
+      })
     },
     timeChange(data) {
       return timestampToTime(data)

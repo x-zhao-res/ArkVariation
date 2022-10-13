@@ -6,7 +6,7 @@ const arkuser = {
       userId: 0,
       userName: '',
       belongTribe: '',
-      isAdmin: false
+      isAdmin: 0
     }
   },
   mutations: {},

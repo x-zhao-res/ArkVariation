@@ -35,3 +35,10 @@ export function getGroup(params) {
     params
   })
 }
+export function delGroup(params) {
+  return requestUse({
+    url: '/delGroup',
+    method: 'get',
+    params
+  })
+}

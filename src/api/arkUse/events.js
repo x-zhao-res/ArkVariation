@@ -14,3 +14,10 @@ export function getEvent(params) {
     params
   })
 }
+export function abandonEvent(params) {
+  return requestUse({
+    url: '/abadonEvent',
+    method: 'get',
+    params
+  })
+}

@@ -9,7 +9,7 @@
               v-for="item in groupList"
               :key="item.id"
               :label="item.groupName"
-              :value="item.varyOrianismId"
+              :value="item.id"
             />
           </el-select>
         </div>
@@ -59,7 +59,8 @@ export default {
         belongGroupId: 0,
         belongOrianismId: 0,
         eventState: 0,
-        upNum: -1
+        upNum: -1,
+        belongTribe: this.$store.state.arkuser.belongTribe
       }
     }
   },
@@ -70,14 +71,14 @@ export default {
   methods: {
     changeGroup(data) {
       for (let groupNum = 0; groupNum < this.groupList.length; groupNum++) {
-        if (this.groupList[groupNum].varyOrianismId === data) {
+        if (this.groupList[groupNum].id === data) {
           this.event.belongGroupId = this.groupList[groupNum].id
           this.event.belongOrianismId = this.groupList[groupNum].varyOrianismId
         }
       }
     },
     groupSelectList() {
-      getGroup({ belongTribe: this.$store.state.arkuser.belongTribe }).then(res => {
+      getGroup({ belongTribe: this.$store.state.arkuser.belongTribe, fuckState: 1 }).then(res => {
         this.groupList = res
       }).catch(err => {
         console.log(err)
