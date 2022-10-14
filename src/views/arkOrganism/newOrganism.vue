@@ -58,8 +58,8 @@ export default {
         createTime: this.toGetTime(), // 这里用时间戳的格式写
         upTime: 0,
         varyAllNum: 0,
-        babyTime: '',
-        fuckInterval: 0,
+        babyTime: 0,
+        fuckInterval: 2880,
         belongTribe: this.$store.state.arkuser.belongTribe,
         noForget: ''
       }
@@ -100,7 +100,7 @@ export default {
       this.Origanism.notForget = ''
       this.Origanism.toBigTime = 0
       this.Origanism.upTime = 0
-      this.Origanism.fuckInterval = 0
+      this.Origanism.fuckInterval = 2880
       this.Origanism.createTime = this.toGetTime()
       this.$message({
         message: '清除成功',

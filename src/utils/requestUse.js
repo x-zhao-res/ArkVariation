@@ -23,10 +23,7 @@ service.interceptors.request.use((config) => {
 })
 
 service.interceptors.response.use((response) => {
-  const { status, message, code, token, time } = response.data
-  if (status !== 200) {
-    Message({ type: 'danger', message })
-  }
+  const { code, token, time } = response.data
   if (code === 524) {
     setToken('token', token)
     localStorage.setItem('timeexp', time)

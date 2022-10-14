@@ -21,14 +21,11 @@
           <el-descriptions-item label="贤者时间">{{ data.fuckInterval + 'min' }}</el-descriptions-item>
           <el-descriptions-item label="妊娠周期">{{ data.babyTime + 'min' }}</el-descriptions-item>
           <el-descriptions-item label="备注" :span="2">{{ data.noForget }}</el-descriptions-item>
-          <el-descriptions-item label="已记录变异属性">
-            <el-tag size="middle">攻击</el-tag>
-          </el-descriptions-item>
         </el-descriptions>
       </el-card>
     </el-row>
     <el-row>
-      <cardsComponent v-for="(item,key) in eventSimple" :key="key" :optionget="option" :eventforce="item" />
+      <cardsComponent v-for="(item,key) in eventSimple" :key="key" :optionget="option" :eventforce="item" @regresh="refreshon" />
     </el-row>
   </div>
 </template>
@@ -75,10 +72,15 @@ export default {
     this.geteventSimple()
   },
   methods: {
+    refreshon() {
+      this.getInformation()
+      this.geteventSimple()
+    },
     handleClick(data) {
       console.log(data)
     },
     geteventSimple() {
+      this.eventSimple = []
       getEvent({
         belongTribe: this.$store.state.arkuser.belongTribe,
         belongOrianismId: this.data.id
@@ -89,6 +91,7 @@ export default {
       })
     },
     getInformation() {
+      this.orianismArray = []
       getGroup({
         varyOrianismId: this.data.id,
         belongTribe: this.$store.state.arkuser.belongTribe
@@ -133,7 +136,7 @@ export default {
         },
         title: {
           show: true,
-          text: '虚空飞龙属性柱状图',
+          text: this.data.oriName + '属性柱状图',
           textStyle: {
             fontSize: 19,
             fontFamily: 'Microsoft YaHei'

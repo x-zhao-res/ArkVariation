@@ -22,16 +22,14 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column label="日期" width="140px" align="center">
+      <el-table-column label="日期" width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ timeChange(parseInt(row.event.timeStart)) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="附属组" width="160" align="center">
         <template slot-scope="{row}">
-          <el-tooltip style="margin-top: 4px" effect="dark" content="Left Center 提示文字" placement="top">
-            <span>{{ row.groupItem.name }}</span>
-          </el-tooltip>
+          <span>{{ row.groupItem.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="事件状态" min-width="30px" align="center">
@@ -39,7 +37,7 @@
           <el-tag effect="dark" :type="(row.event.eventState===0)?'primary':((row.event.eventState === 1)?'success':'danger')"> {{ (row.event.eventState===0)?'未录入':((row.event.eventState === 1)?'已录入':'已废弃') }} </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="当前属性值" min-width="30px" align="center">
+      <el-table-column label="当前点数" min-width="30px" align="center">
         <template slot-scope="{row}">
           <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.groupItem.attributeNum) }}</span>
         </template>

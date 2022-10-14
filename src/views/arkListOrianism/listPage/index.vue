@@ -1,14 +1,5 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-input v-model="search.oriName" placeholder="生物名称" style="width: 200px;margin-right: 10px" class="filter-item" />
-      <el-select v-model="search.varyAllNum" placeholder="变异筛选" clearable class="filter-item" style="width: 170px;margin-right: 10px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="getListSearch">
-        搜索
-      </el-button>
-    </div>
 
     <el-table
       :key="tableKey"

@@ -21,3 +21,17 @@ export function abandonEvent(params) {
     params
   })
 }
+export function recordEvent(params) {
+  return requestUse({
+    url: '/recordEvent',
+    method: 'get',
+    params
+  })
+}
+export function changeTime(params) {
+  return requestUse({
+    url: '/changeTime',
+    method: 'get',
+    params
+  })
+}

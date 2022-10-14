@@ -96,6 +96,13 @@ export default {
         this.event.planStart = ((res.data[0].upTime + res.data[0].babyTime) * 60000 + this.event.timeStart).toString() // 计算预完成时间
         this.event.timeStart = this.event.timeStart.toString()
         createEventUse({ ...this.event }).then(res => {
+          if (res.message === '存在重复') {
+            this.$notify({
+              title: res.message,
+              message: '存在重复，请优先处理重复事件',
+              type: 'error'
+            })
+          }
           if (res.message === '创建成功') {
             this.$notify({
               title: res.message,

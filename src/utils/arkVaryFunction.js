@@ -15,7 +15,10 @@ export function timestampToTime(timestamp) {
   var Y = date.getFullYear()
   var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
   var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate())
-  return Y + '/' + M + '/' + D
+  var h = date.getHours() + ':'
+  var m = date.getMinutes() + ':'
+  var s = date.getSeconds()
+  return Y + '/' + M + '/' + D + ' ' + h + m + s
 }
 export function fotUpTime(timeStart, upTime, babyTime) {
   const now = new Date().getTime()
@@ -35,4 +38,19 @@ export function fotBabyTime(timeStart, upTime, babyTime) {
   } else {
     return Math.floor(((now - timeStart) / (babyTime * 60000) * 10000)) / 100
   }
+}
+export function reTime(timeStart, allTime, howPorgress, toUpOrDown) {
+  // 所有带时间的都以秒来计时，进度用百分比来调整范围是0-1
+  const toFix = (allTime * howPorgress) * 0.5
+  let newStart
+  if (toUpOrDown === 1) {
+    // 表示需要调高,timeStart向后调，减法
+    newStart = timeStart - toFix
+    console.log('减法', timeStart, toFix)
+  } else if (toUpOrDown === 0) {
+    // 表示需要调低,timeStart向前跳，加法
+    newStart = timeStart + toFix
+    console.log('加法', timeStart, toFix)
+  }
+  return newStart
 }
