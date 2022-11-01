@@ -2,9 +2,6 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.title" placeholder="组名称" style="width: 200px;margin-right: 10px" class="filter-item" />
-      <el-select v-model="listQuery.type" placeholder="贤者状态" clearable class="filter-item" style="width: 170px;margin-right: 10px">
-        <el-option v-for="item in dragonVary" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search">
         搜索
       </el-button>
@@ -102,8 +99,8 @@ export default {
     }
   },
   mounted() {
+    this.listLoading = true
     this.getListUse()
-    this.changeIntervalGroupProgress()
   },
   methods: {
     showConfirm(data) {
@@ -125,7 +122,6 @@ export default {
           })
           this.VaryList = []
           this.getListUse()
-          this.changeIntervalGroupProgress()
         } else {
           this.$notify({
             title: '删除失败',
@@ -138,8 +134,8 @@ export default {
       })
     },
     getListUse() {
+      this.listLoading = true
       getGroup().then(res => {
-        console.log(res)
         for (let arrNum = 0; arrNum < res.length; arrNum++) {
           if (res[arrNum].fuckState === 1) {
             res[arrNum].progressUse = 100
@@ -148,24 +144,15 @@ export default {
           }
         }
         this.VaryList = res
+        this.listLoading = false
       }).catch(error => {
+        this.listLoading = false
         console.log(error)
       })
     },
     listProgressIn(data) {
       console.log(ProgressUse(data))
       return ProgressUse(data)
-    },
-    changeIntervalGroupProgress() {
-      setInterval(() => {
-        for (let listNum = 0; listNum < this.VaryList.length; listNum++) {
-          if (this.VaryList[listNum].fuckState === 1) {
-            this.VaryList[listNum].progressUse = 100
-          } else {
-            this.VaryList[listNum].progressUse = ProgressUse(this.VaryList[listNum])
-          }
-        }
-      }, 2000) // 2S读一次现场时间
     }
   }
 }

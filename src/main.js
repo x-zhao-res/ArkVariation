@@ -19,7 +19,7 @@ import './permission' // permission control
 import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
-
+import JsonExcel from 'vue-json-excel'
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -44,7 +44,7 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.config.productionTip = false
-
+Vue.component('downloadExcel', JsonExcel)
 new Vue({
   el: '#app',
   router,

@@ -1,21 +1,25 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="组名称" style="width: 200px;margin-right: 10px" class="filter-item" />
-      <el-select v-model="listQuery.type" placeholder="是否变异" clearable class="filter-item" style="width: 170px;margin-right: 10px">
-        <el-option v-for="item in dragonVary" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.baby" placeholder="幼崽成长状态" clearable class="filter-item" style="width: 170px;margin-right: 10px">
-        <el-option v-for="item in babyState" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search">
+      <el-input v-model="searchName" placeholder="组名称" style="width: 200px;margin-right: 10px" class="filter-item" />
+      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchNameGet">
         搜索
       </el-button>
+      <download-excel
+        :data="excelUse"
+        :fields="json_feild"
+        name="varyExcel"
+      >
+        <el-button class="filter-item" type="success">
+          Excel下载
+        </el-button>
+      </download-excel>
     </div>
 
     <el-table
       :key="tableKey"
-      v-loading="false"
+      ref="table"
+      v-loading="controlLoading"
       :data="VaryList"
       border
       fit
@@ -72,9 +76,6 @@
           <el-button type="primary" @click="toDetailGroup(row)">
             详情
           </el-button>
-          <el-button type="success" :disabled="row.event.eventState===1?true:(row.event.eventState===2?true:(row.babyProgress!==100))" @click="thatShow(row)">
-            录入
-          </el-button>
           <el-button type="danger" :disabled="row.event.eventState===1?true:(row.event.eventState === 2)" @click="judgeEvent(row)">
             废弃
           </el-button>
@@ -93,7 +94,6 @@
         <el-button type="primary" @click="upNumEventAndEndRefrsh">确 定</el-button>
       </div>
     </el-dialog>
-    <!--    <pagination :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />-->
 
   </div>
 </template>
@@ -119,16 +119,22 @@ export default {
       chooseList: {},
       upNum: null,
       disShow: false,
-      listQuery: {
-        page: 1,
-        baby: '',
-        limit: 20,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
-      },
+      controlLoading: false,
+      searchName: null,
       babyState,
-      dragonVary
+      dragonVary,
+      excelUse: [{
+        name: null,
+        time: null,
+        point: null,
+        forget: null
+      }],
+      json_feild: {
+        时间: 'time',
+        名称: 'name',
+        点数: 'point',
+        备忘: 'forget'
+      }
     }
   },
   created() {
@@ -136,12 +142,62 @@ export default {
   },
   mounted() {
     this.getListEvent()
-    this.intervalUse()
+    this.$nextTick(() => {
+      this.$refs.table.bodyWrapper.scrollTop = 0
+    })
   },
   methods: {
-    thatShow(data) {
-      this.disShow = true
-      this.chooseList = data
+    excelJsonUse(data) {
+      this.excelUse = [{
+        name: null,
+        time: null,
+        point: null,
+        forget: null
+      }]
+      for (let xslNum = 0; xslNum < data.length; xslNum++) {
+        this.excelUse[xslNum] = {
+          time: this.timeChange(parseInt(data[xslNum].event.timeStart)),
+          name: data[xslNum].groupItem.name,
+          point: data[xslNum].groupItem.attributeNum,
+          forget: data[xslNum].event.eventNoForget
+        }
+      }
+    },
+    searchNameGet() {
+      let num
+      this.controlLoading = true
+      if (this.searchName) {
+        for (let searchNum = 0; searchNum < this.VaryList.length; searchNum++) {
+          if (this.searchName === this.VaryList[searchNum].groupItem.name) {
+            num = this.VaryList[searchNum].groupItem.id
+          }
+        }
+        console.log(num)
+        if (num) {
+          const that = this
+          getEvent({ belongTribe: this.$store.state.arkuser.belongTribe, belongGroupId: num }).then(res => {
+            this.VaryList = []
+            this.VaryList = res
+            for (let listNum = 0; listNum < res.length; listNum++) {
+              if (res[listNum].event.eventState !== 2) {
+                that.VaryList[listNum].upProgress = fotUpTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+                that.VaryList[listNum].babyProgress = fotBabyTime(parseInt(res[listNum].event.timeStart), parseInt(res[listNum].orianismItem.upTime), parseInt(res[listNum].orianismItem.babyTime))
+              } else {
+                that.VaryList[listNum].upProgress = 0
+                that.VaryList[listNum].babyProgress = 0
+              }
+            }
+            this.$message({ message: '查询成功', type: 'success' })
+            this.excelJsonUse(res)
+            this.controlLoading = false
+          }).finally(res => {
+            this.controlLoading = false
+          })
+        }
+      } else {
+        this.getListEvent()
+        this.controlLoading = false
+      }
     },
     upNumEventAndEndRefrsh() {
       if ((parseInt(this.upNum) < 1 || parseInt(this.upNum) > 5)) {
@@ -178,7 +234,6 @@ export default {
             type: 'success'
           })
           this.getListEvent()
-          this.intervalUse()
         } else {
           this.$message({
             message: res.message,
@@ -191,8 +246,10 @@ export default {
       return (Math.random()).toString()
     },
     getListEvent() {
+      this.controlLoading = true
       const that = this
       getEvent().then(res => {
+        console.log(res)
         this.VaryList = res
         for (let listNum = 0; listNum < res.length; listNum++) {
           if (res[listNum].event.eventState !== 2) {
@@ -203,21 +260,12 @@ export default {
             that.VaryList[listNum].babyProgress = 0
           }
         }
+        this.controlLoading = false
+        this.excelJsonUse(res)
       }).catch(err => {
         console.log(err)
+        this.controlLoading = false
       })
-    },
-    intervalUse() {
-      const that = this
-      setInterval(() => {
-        for (let arrNum = 0; arrNum < this.VaryList.length; arrNum++) {
-          if (that.VaryList[arrNum].event.eventState !== 2) {
-            this.VaryList[arrNum].upProgress = fotUpTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
-            this.VaryList[arrNum].babyProgress = fotBabyTime(parseInt(that.VaryList[arrNum].event.timeStart), parseInt(that.VaryList[arrNum].orianismItem.upTime), parseInt(that.VaryList[arrNum].orianismItem.babyTime))
-          }
-        }
-        this.tableKey = !this.tableKey
-      }, 2000)
     },
     toDetailGroup(data) {
       this.$router.push({
