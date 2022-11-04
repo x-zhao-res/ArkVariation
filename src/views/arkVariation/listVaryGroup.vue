@@ -21,7 +21,7 @@
           <span>{{ row.creatTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="组名称" width="160" align="center">
+      <el-table-column label="组名称" width="290" align="center">
         <template slot-scope="{row}">
           <el-tooltip style="margin-top: 4px" effect="dark" content="Left Center 提示文字" placement="top">
             <span>{{ row.groupName }}</span>
@@ -135,7 +135,7 @@ export default {
     },
     getListUse() {
       this.listLoading = true
-      getGroup().then(res => {
+      getGroup({ belongTribe: this.$store.state.arkuser.belongTribe }).then(res => {
         for (let arrNum = 0; arrNum < res.length; arrNum++) {
           if (res[arrNum].fuckState === 1) {
             res[arrNum].progressUse = 100

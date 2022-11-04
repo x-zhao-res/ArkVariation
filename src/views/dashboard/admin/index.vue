@@ -1,59 +1,29 @@
 <template>
   <div class="dashboard-editor-container">
 
-    <panel-group />
+    <panel-group :card="card" />
     <el-row align="middle" :gutter="32">
-      <el-col :xs="24" :sm="24" :lg="6">
+
+      <el-col v-for="(item,key) in groupCard" :key="key" :xs="24" :sm="24" :lg="6">
         <el-card style="cursor: pointer" shadow="hover" class="oranism-card" @click="toDetails">
           <div slot="header" style="display: flex;justify-content: space-between;align-items: center">
-            <span style="font-size: 19px;font-weight: bolder">虚空飞龙 - 氧气</span>
-            <el-tag type="success">已就绪</el-tag>
+            <span style="font-size: 19px;font-weight: bolder">{{ item.groupName }}</span>
+            <el-tag :type="item.fuckState === 1?'success':'danger'">{{ item.fuckState === 1?'已就绪':'未就绪' }}</el-tag>
           </div>
           <div class="num-in-now">
-            142 / 254
+            {{ item.attributeNum }} / 254
           </div>
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :sm="24" :lg="6">
-        <el-card style="cursor: pointer" shadow="hover" class="oranism-card" @click="toDetails">
-          <div slot="header" style="display: flex;justify-content: space-between;align-items: center">
-            <span style="font-size: 19px;font-weight: bolder">虚空飞龙 - 氧气</span>
-            <el-tag type="success">已就绪</el-tag>
-          </div>
-          <div class="num-in-now">
-            142 / 254
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :xs="24" :sm="24" :lg="6">
-        <el-card style="cursor: pointer" shadow="hover" class="oranism-card" @click="toDetails">
-          <div slot="header" style="display: flex;justify-content: space-between;align-items: center">
-            <span style="font-size: 19px;font-weight: bolder">虚空飞龙 - 氧气</span>
-            <el-tag type="success">已就绪</el-tag>
-          </div>
-          <div class="num-in-now">
-            142 / 254
-          </div>
-        </el-card>
-      </el-col>
-
-    </el-row>
-
-    <el-row style="margin-top: 20px" :gutter="8">
-      <el-col :span="24" style="padding-right:8px;margin-bottom:30px;">
-        <transaction-table />
-      </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
 import PanelGroup from './components/PanelGroup'
-import TransactionTable from './components/TransactionTable'
-import TodoList from './components/TodoList'
-import BoxCard from './components/BoxCard'
+import { getGroup } from '@/api/arkUse/orianism'
+import { allIndex } from '@/api/arkUse/user'
 
 const lineChartData = {
   newVisitis: {
@@ -77,19 +47,36 @@ const lineChartData = {
 export default {
   name: 'DashboardAdmin',
   components: {
-    PanelGroup,
-    TransactionTable,
-    TodoList,
-    BoxCard
+    PanelGroup
   },
   data() {
     return {
-      lineChartData: lineChartData.shoppings
+      lineChartData: lineChartData.shoppings,
+      groupCard: [],
+      card: null
     }
+  },
+  mounted() {
+    this.getGroups()
+    this.indexGet()
   },
   methods: {
     toDetails() {
       console.log(111)
+    },
+    getGroups() {
+      getGroup({ belongTribe: this.$store.state.arkuser.belongTribe }).then(res => {
+        this.groupCard = res
+        console.log(this.groupCard)
+      })
+    },
+    indexGet() {
+      allIndex({ tribe: this.$store.state.arkuser.belongTribe }).then(res => {
+        this.card = res
+        console.log(this.card)
+      }).catch(err => {
+        console.log(err)
+      })
     }
   }
 }

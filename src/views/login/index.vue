@@ -11,9 +11,9 @@
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="username"
+          ref="账号"
           v-model="loginData.name"
-          placeholder="Username"
+          placeholder="账号"
           name="username"
           type="text"
           tabindex="1"
@@ -31,8 +31,8 @@
             ref="password"
             v-model="loginData.password"
             :type="passwordType"
-            placeholder="Password"
-            name="password"
+            placeholder="密码"
+            name="密码"
             tabindex="2"
             autocomplete="on"
             @keyup.native="checkCapslock"

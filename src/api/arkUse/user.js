@@ -22,3 +22,10 @@ export function refresh_token(data) {
     data
   })
 }
+export function allIndex(params) {
+  return requestUse({
+    url: '/allgetIndex',
+    method: 'get',
+    params
+  })
+}

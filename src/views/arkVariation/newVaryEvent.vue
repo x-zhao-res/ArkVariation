@@ -78,7 +78,7 @@ export default {
       }
     },
     groupSelectList() {
-      getGroup({ belongTribe: this.$store.state.arkuser.belongTribe, fuckState: 1 }).then(res => {
+      getGroup({ belongTribe: this.$store.state.arkuser.belongTribe }).then(res => {
         this.groupList = res
       }).catch(err => {
         console.log(err)

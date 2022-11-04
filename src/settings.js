@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Vue Element Admin',
+  title: '方舟变异辅助器v1.0测试版-by王司徒',
 
   /**
    * @type {boolean} true | false

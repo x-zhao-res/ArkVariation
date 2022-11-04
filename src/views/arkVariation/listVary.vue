@@ -31,7 +31,7 @@
           <span>{{ timeChange(parseInt(row.event.timeStart)) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="附属组" width="160" align="center">
+      <el-table-column label="附属组" width="290" align="center">
         <template slot-scope="{row}">
           <span>{{ row.groupItem.name }}</span>
         </template>
@@ -248,7 +248,7 @@ export default {
     getListEvent() {
       this.controlLoading = true
       const that = this
-      getEvent().then(res => {
+      getEvent({ belongTribe: this.$store.state.arkuser.belongTribe }).then(res => {
         console.log(res)
         this.VaryList = res
         for (let listNum = 0; listNum < res.length; listNum++) {

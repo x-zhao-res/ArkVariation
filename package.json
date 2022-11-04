@@ -4,16 +4,22 @@
   "description": "A magical vue admin. An out-of-box UI solution for enterprise applications. Newest development stack of vue. Lots of awesome features",
   "author": "Pan <panfree23@gmail.com>",
   "scripts": {
-    "dev": "vue-cli-service serve",
+    "test:unit": "jest --clearCache && vue-cli-service test:unit",
     "lint": "eslint --ext .js,.vue src",
     "build:prod": "vue-cli-service build",
     "build:stage": "vue-cli-service build --mode staging",
-    "preview": "node build/index.js --preview",
+    "dev": "vue-cli-service serve",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
     "new": "plop",
-    "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml",
-    "test:unit": "jest --clearCache && vue-cli-service test:unit",
-    "test:ci": "npm run lint && npm run test:unit"
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps",
+    "preview": "node build/index.js --preview",
+    "svgo": "svgo -f src/icons/svg --config=src/icons/svg/dashboard.svg",
+    "test:ci": "npm run lint && npm run test:unit",
+    "electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten"
   },
+  "main": "background.js",
   "dependencies": {
     "axios": "0.18.1",
     "clipboard": "2.0.4",
@@ -23,6 +29,7 @@
     "driver.js": "0.9.5",
     "dropzone": "5.5.1",
     "echarts": "4.2.1",
+    "electron-devtools-installer": "^3.1.0",
     "element-ui": "2.15.10",
     "file-saver": "2.0.1",
     "fuse.js": "3.4.4",
@@ -58,6 +65,9 @@
     "chalk": "2.4.2",
     "chokidar": "2.1.5",
     "connect": "3.6.6",
+    "electron": "^13.0.0",
+    "electron-devtools-installer": "^3.1.0",
+    "electron-icon-builder": "^2.0.1",
     "eslint": "6.7.2",
     "eslint-plugin-vue": "6.2.2",
     "html-webpack-plugin": "3.2.0",
@@ -72,6 +82,7 @@
     "serve-static": "1.13.2",
     "svg-sprite-loader": "4.1.3",
     "svgo": "1.2.0",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-template-compiler": "2.6.10"
   },
   "browserslist": [
@@ -84,6 +95,11 @@
   "engines": {
     "node": ">=8.9",
     "npm": ">= 3.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "keywords": [
     "vue",
@@ -100,11 +116,6 @@
       "eslint --fix",
       "git add"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "repository": {
     "type": "git",

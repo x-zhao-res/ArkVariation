@@ -9,7 +9,7 @@
           <div class="card-panel-text">
             部落组成员
           </div>
-          <count-to :start-val="0" :end-val="102400" :duration="2600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="data.user" :duration="2600" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -22,7 +22,7 @@
           <div class="card-panel-text">
             已创建生物
           </div>
-          <count-to :start-val="0" :end-val="81212" :duration="3000" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="data.orianism" :duration="3000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -35,7 +35,7 @@
           <div class="card-panel-text">
             已创建组
           </div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="data.group" :duration="3200" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -48,7 +48,7 @@
           <div class="card-panel-text">
             变异事件
           </div>
-          <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="data.event" :duration="3600" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -57,10 +57,23 @@
 
 <script>
 import CountTo from 'vue-count-to'
-
+import { allIndex } from '@/api/arkUse/user'
 export default {
   components: {
     CountTo
+  },
+  data() {
+    return {
+      data: {}
+    }
+  },
+  mounted() {
+    allIndex({ tribe: this.$store.state.arkuser.belongTribe }).then(res => {
+      console.log('nea', res)
+      this.data = res
+    }).catch(err => {
+      console.log(err)
+    })
   },
   methods: {
   }

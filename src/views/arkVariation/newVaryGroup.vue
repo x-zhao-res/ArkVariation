@@ -34,6 +34,10 @@
           </el-select>
         </div>
         <div class="inputBoxUse">
+          <span class="inputBoxTitle">龙房名称(可选):</span>
+          <el-input v-model="longHouse" style="width: 400px" placeholder="龙房名称" @input="houseInput" />
+        </div>
+        <div class="inputBoxUse">
           <span class="inputBoxTitle">属性初值:</span>
           <el-input-number v-model="Origanism.attributeNum" :min="1" :max="254" style="width: 400px" label="描述文字" />
         </div>
@@ -72,6 +76,8 @@ export default {
       orianismId: [],
       setName: '',
       setAtt: '',
+      longHouse: '',
+      setValue: '',
       Origanism: {
         groupName: ' - ',
         creatTime: this.toGetTime(), // 这里用时间戳的格式写
@@ -110,6 +116,16 @@ export default {
     this.getName()
   },
   methods: {
+    houseInput(value) {
+      this.setValue = value
+      if (this.setName !== '') {
+        if (this.setAtt === '') {
+          this.Origanism.groupName = this.setName + ' - ' + this.setValue
+        } else {
+          this.Origanism.groupName = this.setName + ' - ' + this.setAtt + ' - ' + this.setValue
+        }
+      }
+    },
     toGetTime() {
       var time = new Date()
       return time.toLocaleDateString()
@@ -128,6 +144,12 @@ export default {
               title: '创建成功',
               type: 'success',
               message: '组 ' + this.Origanism.varyOrianismName + ' 创建成功'
+            })
+          } else {
+            this.$notify({
+              title: res.message,
+              type: 'primary',
+              message: res.message
             })
           }
           setTimeout(() => {
