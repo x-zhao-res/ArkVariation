@@ -41,7 +41,7 @@ export function fotBabyTime(timeStart, upTime, babyTime) {
 }
 export function reTime(timeStart, allTime, howPorgress, toUpOrDown) {
   // 所有带时间的都以秒来计时，进度用百分比来调整范围是0-1
-  const toFix = (allTime * howPorgress) * 0.5
+  const toFix = (allTime * howPorgress)
   let newStart
   if (toUpOrDown === 1) {
     // 表示需要调高,timeStart向后调，减法

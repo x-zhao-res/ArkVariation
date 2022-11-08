@@ -3,7 +3,6 @@
 
     <panel-group :card="card" />
     <el-row align="middle" :gutter="32">
-
       <el-col v-for="(item,key) in groupCard" :key="key" :xs="24" :sm="24" :lg="6">
         <el-card style="cursor: pointer" shadow="hover" class="oranism-card" @click="toDetails">
           <div slot="header" style="display: flex;justify-content: space-between;align-items: center">

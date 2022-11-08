@@ -136,6 +136,22 @@ export const constantRoutes = [
         meta: { title: '变异事件列表', icon: 'example', affix: true }
       }
     ]
+  },
+  {
+    path: '/arkSup',
+    component: Layout,
+    meta: {
+      title: '辅助模块',
+      icon: 'lock'
+    },
+    children: [
+      {
+        path: 'serverSup',
+        component: () => import('@/views/arkSup/supServer'),
+        name: 'serverSup',
+        meta: { title: '9128服务器直连', icon: 'lock', affix: true }
+      }
+    ]
   }
 ]
 
