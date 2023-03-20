@@ -41,9 +41,11 @@
           <el-tag effect="dark" :type="(row.event.eventState===0)?'primary':((row.event.eventState === 1)?'success':'danger')"> {{ (row.event.eventState===0)?'未录入':((row.event.eventState === 1)?'已录入':'已废弃') }} </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="当前点数" min-width="30px" align="center">
+      <el-table-column label="变异结果" min-width="30px" align="center">
         <template slot-scope="{row}">
-          <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.groupItem.attributeNum) }}</span>
+          <!--          <span style="font-size: 21px;font-weight: bolder">{{ parseInt(row.event.upNum) }}</span>-->
+          <el-tag v-if="row.event.eventState !== 2 && row.event.upNum !== -1" effect="dark" :type="row.event.upNum=== 0 ? 'danger':'success'" style="font-size: 17px;font-weight: bolder">{{ ' + '+row.event.upNum }}</el-tag>
+          <span v-if="row.event.eventState === 2 && row.event.upNum === -1">--</span>
         </template>
       </el-table-column>
       <el-table-column label="妊娠进度" class-name="status-col" width="220">
